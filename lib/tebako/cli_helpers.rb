@@ -58,6 +58,18 @@ module Tebako
         "-DDEPS:STRING=\"#{deps}\" -G \"#{m_files}\" -B \"#{output}\" -S \"#{source}\""
     end
 
+    def clean_cache
+      puts "Cleaning tebako packaging environment"
+      # Using File.join(deps, "") to ensure that the slashes are appropriate
+      FileUtils.rm_rf([File.join(deps, ""), File.join(output, "")], secure: true)
+    end
+
+    def clean_output
+      puts "Cleaning CMake cache"
+      # Using File.join(output, "") to ensure that the slashes are appropriate
+      FileUtils.rm_rf(File.join(output, ""), secure: true)
+    end
+
     def deps
       @deps ||= File.join(prefix, "deps")
     end
@@ -191,14 +203,13 @@ module Tebako
         version_file_path = File.join(prefix, E_VERSION_FILE)
         file_version = File.open(version_file_path, &:readline).strip
         rs = file_version == version_key
+        unless rs
+          puts "CMake cache was created by a gem version #{file_version} " \
+               "and cannot be used for gem version #{version_key}"
+        end
       rescue StandardError
         # In case of any error (e.g., file not readable), return false
-        file_version = "<Unknown>"
         rs = false
-      end
-      unless rs
-        puts "Packaging environment was created by a gem version #{file_version} " \
-             "and cannot be used for gem version #{version_key}"
       end
       rs
     end
