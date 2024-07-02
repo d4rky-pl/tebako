@@ -65,8 +65,14 @@ module Tebako
     end
 
     def clean_output
-      puts "Cleaning CMake cache"
+      puts "Cleaning CMake cache and Ruby build files"
       # Using File.join(output, "") to ensure that the slashes are appropriate
+
+      nmr = "src/_ruby_*"
+      nms = "stash_*"
+      FileUtils.rm_rf(Dir.glob(File.join(deps, nmr)), secure: true)
+      FileUtils.rm_rf(Dir.glob(File.join(deps, nms)), secure: true)
+
       FileUtils.rm_rf(File.join(output, ""), secure: true)
     end
 
